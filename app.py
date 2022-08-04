@@ -1,7 +1,10 @@
-from flask import Flask
+from flask import Flask, jsonify
 
 app = Flask(__name__)
 
-@app.route('/')
+
+@app.route('/ola')
 def ola_mundo():
-    return "<h1> Olá, mundo! Eu to no Docker!</h1>"
+    return jsonify({
+        "ola": "mundo"
+    })
