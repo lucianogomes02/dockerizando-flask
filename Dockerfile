@@ -1,15 +1,15 @@
 FROM python:3.10
 
-RUN python3 -m venv /opt/virtualenv
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
 
-# This is wrong!
-RUN . /opt/virtualenv/bin/activate
+# Install poetry
+RUN pip install poetry
+ENV PATH="${PATH}:/root/.poetry/bin"
 
-# Install dependencies:
-COPY requirements.txt .
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
-
-COPY app.py .
+WORKDIR /usr/src/app
+COPY . .
+RUN poetry config virtualenvs.create false \
+  && poetry install --no-interaction --no-ansi
 
 CMD [ "python3", "-m" , "flask", "--app", "app", "run", "--host=0.0.0.0"]
