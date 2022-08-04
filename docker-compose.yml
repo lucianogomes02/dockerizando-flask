@@ -10,6 +10,7 @@ services:
     image: flask-app:latest
     restart: unless-stopped
     environment:
+      SQLALCHEMY_DATABASE_URI: postgresql+psycopg2://test:test@db/test
       APP_ENV: "prod"
       APP_DEBUG: "False"
       APP_PORT: 5000
