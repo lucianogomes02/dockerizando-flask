@@ -1,8 +1,6 @@
 FROM python:3.10
 
-# Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE 1
-# Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED 1
 
 # Install poetry
@@ -14,4 +12,4 @@ COPY . .
 RUN poetry config virtualenvs.create false \
   && poetry install --no-interaction --no-ansi
 
-CMD [ "flask", "--app", "app", "run"]
+CMD [ "python3", "-m" , "flask", "--app", "app", "run", "--host=0.0.0.0"]
