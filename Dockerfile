@@ -1,9 +1,17 @@
 FROM python:3.10
 
-WORKDIR /flask-app
+# Keeps Python from generating .pyc files in the container
+ENV PYTHONDONTWRITEBYTECODE 1
+# Turns off buffering for easier container logging
+ENV PYTHONUNBUFFERED 1
 
-COPY . /flask-app/
+# Install poetry
+RUN pip install poetry
+ENV PATH="${PATH}:/root/.poetry/bin"
 
-RUN pip install flask
+WORKDIR /usr/src/app
+COPY . .
+RUN poetry config virtualenvs.create false \
+  && poetry install --no-interaction --no-ansi
 
-CMD [ "python3", "-m" , "flask", "--app", "app", "run", "--host=0.0.0.0"]
+CMD [ "flask", "--app", "app", "run"]
