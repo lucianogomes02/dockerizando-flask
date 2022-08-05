@@ -1,7 +1,9 @@
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import DateTime
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    DateTime,
+)
 from sqlalchemy.orm import declarative_base
 
 Base = declarative_base()

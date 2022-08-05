@@ -4,7 +4,6 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from datetime import datetime
-from collections import defaultdict
 
 app = Flask(__name__)
 
