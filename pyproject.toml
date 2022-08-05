@@ -8,6 +8,7 @@ authors = ["lucianogomes02 <luciano@pontotel.com.br>"]
 python = "^3.9"
 Flask = "^2.2.1"
 psycopg2 = "^2.9.3"
+SQLAlchemy = "^1.4.39"
 
 [tool.poetry.dev-dependencies]
 
