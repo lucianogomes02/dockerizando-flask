@@ -7,16 +7,16 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-engine = create_engine("postgresql+psycopg2://test:test@postgresql/test", echo=True, future=True)
+engine = create_engine("postgresql+psycopg2://test:test@postgresql/flask_api", echo=True, future=True)
 Base.metadata.create_all(engine)
 
 
 @app.route('/', methods=["GET"])
-def ola_mundo():
-    return {"ola": "mundo"}
+def bem_vindo():
+    return {"ola": "bem-vindo!"}
 
 
-@app.route('/usuario/cadastro', methods=["POST"])
+@app.route('/usuario/cadastrar', methods=["POST"])
 def cadastrar_usuario():
     if novo_usuario_eh_valido(dict(request.json)):
         novo_usuario = Usuario(

@@ -8,7 +8,7 @@ services:
       dockerfile: Dockerfile
     container_name: flask-api
     image: flask-app:latest
-    restart: unless-stopped
+    restart: always
     environment:
       APP_ENV: "prod"
       APP_DEBUG: "False"
@@ -18,9 +18,9 @@ services:
 
   postgresql:
     environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: test
+      POSTGRES_USER: docker-api
+      POSTGRES_PASSWORD: flaskAPIdocker
+      POSTGRES_DB: flask_api
     restart: always
     image: postgres:12.6
     ports:
