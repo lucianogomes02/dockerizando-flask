@@ -23,18 +23,20 @@ def cadastrar_usuario():
             nome=request.json.get("nome"),
             criado_em=datetime.now()
         )
-        with Session(engine) as session:
+        with Session(bind=engine, expire_on_commit=False) as session:
+            session.begin()
             try:
                 session.add(novo_usuario)
+            except Exception:
+                session.rollback()
+            else:
                 session.commit()
                 session.close()
                 return jsonify(
                     {
-                        "sucesso": f"Usuario cadastrado com sucesso!"
+                        "sucesso": f"Usuario {novo_usuario.nome} cadastrado com sucesso!"
                     }
                 )
-            except Exception:
-                session.rollback()
     return jsonify(
         {
             "erro" : f"Nome de usuário inválido para cadastro. Verifique o body request!"
@@ -45,7 +47,7 @@ def cadastrar_usuario():
 @app.route('/usuarios', methods=["GET"])
 def pegar_usuarios():
     usuarios = list()
-    with Session(engine) as session:
+    with Session(bind=engine) as session:
         resultados = session.query(Usuario).all()
         for usuario in resultados:
             usuarios.append(
