@@ -7,7 +7,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-engine = create_engine("postgresql+psycopg2://test:test@postgresql/flask_api", echo=True, future=True)
+engine = create_engine("postgresql+psycopg2://test:test@postgresql/test", echo=True, future=True)
 Base.metadata.create_all(engine)
 
 
