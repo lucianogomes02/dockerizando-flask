@@ -4,6 +4,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from datetime import datetime
+from collections import defaultdict
 
 app = Flask(__name__)
 
@@ -40,6 +41,23 @@ def cadastrar_usuario():
             "erro" : f"Nome de usuário inválido para cadastro. Verifique o body request!"
         }
     )
+
+
+@app.route('/usuarios', methods=["GET"])
+def pegar_usuarios():
+    usuarios = list()
+    with Session(engine) as session:
+        resultados = session.query(Usuario).all()
+        for usuario in resultados:
+            usuarios.append(
+                {
+                    "id": usuario.id,
+                    "nome": usuario.nome,
+                    "criado_em": usuario.criado_em
+                }
+            )
+        session.close()
+    return jsonify(usuarios)
 
 
 def novo_usuario_eh_valido(novo_usuario: dict):
