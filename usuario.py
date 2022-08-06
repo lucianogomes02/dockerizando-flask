@@ -9,7 +9,7 @@ from sqlalchemy.orm import declarative_base
 Base = declarative_base()
 
 
-class Usuario(Base):
+class UsuarioORM(Base):
     __tablename__ = "usuario"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -18,3 +18,10 @@ class Usuario(Base):
 
     def __repr__(self):
         return f"<Usuario: {self.nome}>"
+
+    def para_dicionario(self):
+        return {
+            "id": self.id,
+            "nome": self.nome,
+            "criado_em": self.criado_em
+        }

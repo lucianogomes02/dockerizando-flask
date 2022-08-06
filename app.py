@@ -1,54 +1,65 @@
-from flask import Flask, request, jsonify
-from usuario import Usuario, Base
-from sqlalchemy import create_engine
+from flask import Flask, request, jsonify, redirect, url_for
+from usuario import UsuarioORM, Base
+from sqlalchemy import create_engine, DateTime
 from sqlalchemy.orm import Session
 
+from flask_pydantic_spec import FlaskPydanticSpec, Request, Response
+from pydantic import BaseModel
+
 from datetime import datetime
+from typing import Optional, List
 
 app = Flask(__name__)
+spec = FlaskPydanticSpec("flask", title="Dockerizando Flask API")
+spec.register(app)
 
-engine = create_engine("postgresql+psycopg2://test:test@postgresql/test", echo=True, future=True)
+engine = create_engine("postgresql+psycopg2://test:test@localhost:5432/test", echo=True, future=True)
 Base.metadata.create_all(engine)
 
 
-@app.route('/', methods=["GET"])
-def bem_vindo():
-    return {"ola": "bem-vindo!"}
+class Usuario(BaseModel):
+    id: Optional[int]
+    nome: str
+    criado_em: Optional[str]
 
 
-@app.route('/usuario/cadastrar', methods=["POST"])
+class Usuarios(BaseModel):
+    usuarios: List[Usuario]
+
+
+@app.get('/')
+def api_doc():
+    return redirect(url_for("doc_page_swagger"))
+
+
+@app.post('/usuario/cadastrar')
+@spec.validate(
+    body=Request(Usuario),
+    resp=Response(HTTP_200=Usuario)
+)
 def cadastrar_usuario():
-    if novo_usuario_eh_valido(dict(request.json)):
-        novo_usuario = Usuario(
-            nome=request.json.get("nome"),
-            criado_em=datetime.now()
-        )
-        with Session(bind=engine, expire_on_commit=False) as session:
-            session.begin()
-            try:
-                session.add(novo_usuario)
-            except Exception:
-                session.rollback()
-            else:
-                session.commit()
-                session.close()
-                return jsonify(
-                    {
-                        "sucesso": f"Usuario {novo_usuario.nome} cadastrado com sucesso!"
-                    }
-                )
-    return jsonify(
-        {
-            "erro" : f"Nome de usuário inválido para cadastro. Verifique o body request!"
-        }
+    novo_usuario = UsuarioORM(
+        nome=request.json.get("nome"),
+        criado_em=datetime.now()
     )
+    with Session(bind=engine, expire_on_commit=False) as session:
+        session.begin()
+        try:
+            session.add(novo_usuario)
+        except Exception:
+            session.rollback()
+        else:
+            session.commit()
+            session.close()
+            return novo_usuario.para_dicionario()
 
-
-@app.route('/usuarios', methods=["GET"])
+# AJUSTAR VALIDAÇÃO DO PYDANTIC -- pydantic.errors.DictError: value is not a valid dict
+@app.get('/usuarios')
+@spec.validate(resp=Response(HTTP_200=Usuarios))
 def pegar_usuarios():
     usuarios = list()
     with Session(bind=engine) as session:
-        resultados = session.query(Usuario).all()
+        resultados = session.query(UsuarioORM).all()
         for usuario in resultados:
             usuarios.append(
                 {
@@ -60,8 +71,3 @@ def pegar_usuarios():
         session.close()
     return jsonify(usuarios)
 
-
-def novo_usuario_eh_valido(novo_usuario: dict):
-    if "nome" in novo_usuario.keys() and novo_usuario.get("nome", ""):
-        return True
-    return False
