@@ -16,11 +16,11 @@ spec.register(app)
 engine = create_engine("postgresql+psycopg2://test:test@localhost:5432/test", echo=True, future=True)
 Base.metadata.create_all(engine)
 
-
+# TODO resolver tipagem de "criado_em"
 class Usuario(BaseModel):
     id: Optional[int]
     nome: str
-    criado_em: Optional[str]
+    criado_em: Optional[datetime]
 
 
 class Usuarios(BaseModel):
@@ -51,9 +51,15 @@ def cadastrar_usuario():
         else:
             session.commit()
             session.close()
-            return novo_usuario.para_dicionario()
+            return jsonify(
+                Usuario(
+                    id=novo_usuario.id,
+                    nome=novo_usuario.nome,
+                    criado_em=novo_usuario.criado_em
+                ).dict()
+            )
 
-# AJUSTAR VALIDAÇÃO DO PYDANTIC -- pydantic.errors.DictError: value is not a valid dict
+
 @app.get('/usuarios')
 @spec.validate(resp=Response(HTTP_200=Usuarios))
 def pegar_usuarios():
@@ -61,13 +67,14 @@ def pegar_usuarios():
     with Session(bind=engine) as session:
         resultados = session.query(UsuarioORM).all()
         for usuario in resultados:
-            usuarios.append(
-                {
-                    "id": usuario.id,
-                    "nome": usuario.nome,
-                    "criado_em": usuario.criado_em
-                }
-            )
+            usuarios.append(usuario.para_dicionario())
         session.close()
-    return jsonify(usuarios)
+    return jsonify(
+        Usuarios(
+            usuarios=usuarios,
+        ).dict()
+    )
 
+
+if __name__ == "__main__":
+    app.run()
