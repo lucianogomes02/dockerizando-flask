@@ -7,7 +7,7 @@ from flask_pydantic_spec import FlaskPydanticSpec, Request, Response
 from pydantic import BaseModel
 
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional, List, Union
 
 app = Flask(__name__)
 spec = FlaskPydanticSpec("flask", title="Dockerizando Flask API")
@@ -20,7 +20,7 @@ Base.metadata.create_all(engine)
 class Usuario(BaseModel):
     id: Optional[int]
     nome: str
-    criado_em: Optional[datetime]
+    criado_em: Optional[Union[datetime, str]]
 
 
 class Usuarios(BaseModel):
@@ -46,8 +46,14 @@ def cadastrar_usuario():
         session.begin()
         try:
             session.add(novo_usuario)
-        except Exception:
+        except Exception as erro:
             session.rollback()
+            return jsonify(
+                {
+                    "erro": f"Aconteceu um erro ao cadastrar o usuário {novo_usuario.nome}",
+                    "log": str(erro)
+                }
+            )
         else:
             session.commit()
             session.close()
