@@ -82,5 +82,10 @@ def pegar_usuarios():
     )
 
 
+@app.delete('/usuario/<id:int>')
+@spec.validate()
+def deletar_usuario():
+    pass
+
 if __name__ == "__main__":
     app.run()
