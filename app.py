@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, redirect, url_for
 from usuario import UsuarioORM, Base
-from sqlalchemy import create_engine, DateTime
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from flask_pydantic_spec import FlaskPydanticSpec, Request, Response
@@ -16,7 +16,7 @@ spec.register(app)
 engine = create_engine("postgresql+psycopg2://test:test@localhost:5432/test", echo=True, future=True)
 Base.metadata.create_all(engine)
 
-# TODO resolver tipagem de "criado_em"
+
 class Usuario(BaseModel):
     id: Optional[int]
     nome: str
@@ -57,13 +57,13 @@ def cadastrar_usuario():
         else:
             session.commit()
             session.close()
-            return jsonify(
-                Usuario(
-                    id=novo_usuario.id,
-                    nome=novo_usuario.nome,
-                    criado_em=novo_usuario.criado_em
-                ).dict()
-            )
+        return jsonify(
+            Usuario(
+                id=novo_usuario.id,
+                nome=novo_usuario.nome,
+                criado_em=novo_usuario.criado_em
+            ).dict()
+        )
 
 
 @app.get('/usuarios')
@@ -82,10 +82,25 @@ def pegar_usuarios():
     )
 
 
-@app.delete('/usuario/<id:int>')
-@spec.validate()
-def deletar_usuario():
-    pass
+@app.delete('/usuario/<int:id_usuario>')
+@spec.validate(resp=Response('HTTP_204'))
+def deletar_usuario(id_usuario):
+    with Session(bind=engine, autoflush=False) as session:
+        try:
+            usuario = session.query(UsuarioORM).filter_by(id=id_usuario).one()
+            session.delete(usuario)
+        except Exception as erro:
+            session.rollback()
+            return jsonify(
+                {
+                    "erro": f"Aconteceu um erro ao deletar o usuário",
+                    "log": str(erro)
+                }
+            )
+        else:
+            session.commit()
+    return jsonify({})
+
 
 if __name__ == "__main__":
     app.run()
