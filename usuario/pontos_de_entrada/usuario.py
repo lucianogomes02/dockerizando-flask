@@ -1,38 +1,20 @@
-from flask import Flask, request, jsonify, redirect, url_for
-from usuario import UsuarioORM, Base
-from sqlalchemy import create_engine
+from rotas import Usuario, Usuarios, engine
+
+from flask import request, jsonify, Blueprint
+from flask_pydantic_spec import FlaskPydanticSpec
+from usuario_orm import UsuarioORM
 from sqlalchemy.orm import Session
 
-from flask_pydantic_spec import FlaskPydanticSpec, Request, Response
-from pydantic import BaseModel
+from flask_pydantic_spec import Request, Response
 
 from datetime import datetime
-from typing import Optional, List, Union
 
-app = Flask(__name__)
+
+usuario = Blueprint("usuario", __name__, url_prefix="/usuario")
 spec = FlaskPydanticSpec("flask", title="Dockerizando Flask API")
-spec.register(app)
-
-engine = create_engine("postgresql+psycopg2://test:test@localhost:5432/test", echo=True, future=True)
-Base.metadata.create_all(engine)
 
 
-class Usuario(BaseModel):
-    id: Optional[int]
-    nome: str
-    criado_em: Optional[Union[datetime, str]]
-
-
-class Usuarios(BaseModel):
-    usuarios: List[Usuario]
-
-
-@app.get('/')
-def api_doc():
-    return redirect(url_for("doc_page_swagger"))
-
-
-@app.get('/usuarios')
+@usuario.get('/')
 @spec.validate(resp=Response(HTTP_200=Usuarios))
 def pegar_usuarios():
     usuarios = list()
@@ -48,7 +30,7 @@ def pegar_usuarios():
     )
 
 
-@app.post('/usuario/cadastrar')
+@usuario.post('/cadastrar')
 @spec.validate(
     body=Request(Usuario),
     resp=Response(HTTP_201=Usuario)
@@ -82,7 +64,7 @@ def cadastrar_usuario():
             )
 
 
-@app.put('/usuario/<int:id_usuario>')
+@usuario.put('/<int:id_usuario>')
 @spec.validate(
     body=Request(Usuario),
     resp=Response(HTTP_201=Usuario, HTTP_500=None)
@@ -112,7 +94,7 @@ def alterar_usuario(id_usuario):
             )
 
 
-@app.delete('/usuario/<int:id_usuario>')
+@usuario.delete('/<int:id_usuario>')
 @spec.validate(resp=Response('HTTP_204'))
 def deletar_usuario(id_usuario):
     with Session(bind=engine, autoflush=False) as session:
@@ -130,7 +112,3 @@ def deletar_usuario(id_usuario):
         else:
             session.commit()
     return jsonify({})
-
-
-if __name__ == "__main__":
-    app.run()
