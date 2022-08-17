@@ -10,6 +10,7 @@ from flask_pydantic_spec import Request, Response
 
 from datetime import datetime
 
+from .repo import UsuarioRepoLeitura
 
 usuario = Blueprint("usuario", __name__, url_prefix="/usuario")
 spec = FlaskPydanticSpec("flask", title="Dockerizando Flask API")
@@ -18,12 +19,7 @@ spec = FlaskPydanticSpec("flask", title="Dockerizando Flask API")
 @usuario.get('/')
 @spec.validate(resp=Response(HTTP_200=Usuarios))
 def pegar_usuarios():
-    usuarios = list()
-    with Session(bind=engine) as session:
-        resultados = session.query(UsuarioORM).all()
-        for usuario in resultados:
-            usuarios.append(usuario.para_dicionario())
-        session.close()
+    usuarios = UsuarioRepoLeitura().buscar()
     return jsonify(
         Usuarios(
             usuarios=usuarios,

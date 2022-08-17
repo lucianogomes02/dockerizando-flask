@@ -6,7 +6,7 @@ from usuario.orm import UsuarioORM
 
 
 class RepoLeitura(ABC):
-    __db: Session = session
+    __db: Session
 
     @abc.abstractmethod
     def buscar(self):
@@ -14,7 +14,7 @@ class RepoLeitura(ABC):
 
 
 class RepoEscrita(ABC):
-    __db: Session = session
+    __db: Session
 
     @abc.abstractmethod
     def adicionar(self, **args):
@@ -30,6 +30,9 @@ class RepoEscrita(ABC):
 
 
 class UsuarioRepoLeitura(RepoLeitura):
+    def __init__(self, db: Session = session):
+        self.__db = db
+
     def buscar(self):
         usuarios = list()
         resultados = self.__db.query(UsuarioORM).all()
@@ -45,6 +48,9 @@ class UsuarioRepoLeitura(RepoLeitura):
 
 
 class UsuarioRepoEscrita(RepoEscrita):
+    def __init__(self, db: Session = session):
+        self.__db = db
+
     def adicionar(self, usuario):
         try:
             self.__db.begin()
