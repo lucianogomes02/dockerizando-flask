@@ -17,15 +17,15 @@ class RepoEscrita(ABC):
     __db: Session = session
 
     @abc.abstractmethod
-    def adicionar(self):
+    def adicionar(self, **args):
         pass
 
     @abc.abstractmethod
-    def atualizar(self):
+    def atualizar(self, **args):
         pass
 
     @abc.abstractmethod
-    def deletar(self):
+    def deletar(self, **args):
         pass
 
 
@@ -35,9 +35,47 @@ class UsuarioRepoLeitura(RepoLeitura):
         resultados = self.__db.query(UsuarioORM).all()
         for usuario in resultados:
             usuarios.append(usuario.para_dicionario())
-        session.close()
+        self.__db.close()
         return usuarios
 
     def buscar_por_id(self, id_usuario):
-        return session.query(UsuarioORM).filter_by(id=id_usuario).one()
+        usuario = self.__db.query(UsuarioORM).filter_by(id=id_usuario).one()
+        self.__db.close()
+        return usuario
 
+
+class UsuarioRepoEscrita(RepoEscrita):
+    def adicionar(self, usuario):
+        try:
+            self.__db.begin()
+            self.__db.add(usuario)
+        except Exception as erro:
+            self.__db.rollback()
+            return erro
+        else:
+            self.__db.commit()
+        finally:
+            self.__db.close()
+
+    def atualizar(self, id_usuario, args):
+        try:
+            self.__db.begin()
+            self.__db.query(UsuarioORM).filter_by(id=id_usuario).update({"nome": args.get("nome")})
+        except Exception as erro:
+            self.__db.rollback()
+            return erro
+        else:
+            self.__db.commit()
+        finally:
+            self.__db.close()
+
+    def deletar(self, id_usuario):
+        try:
+            usuario = self.__db.query(UsuarioORM).filter_by(id=id_usuario).one()
+            self.__db.delete(usuario)
+        except Exception as erro:
+            self.__db.rollback()
+        else:
+            self.__db.commit()
+        finally:
+            self.__db.close()
