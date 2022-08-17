@@ -10,7 +10,7 @@ from flask_pydantic_spec import Request, Response
 
 from datetime import datetime
 
-from .repo import UsuarioRepoLeitura
+from .repo import UsuarioRepoLeitura, UsuarioRepoEscrita
 
 usuario = Blueprint("usuario", __name__, url_prefix="/usuario")
 spec = FlaskPydanticSpec("flask", title="Dockerizando Flask API")
@@ -33,32 +33,27 @@ def pegar_usuarios():
     resp=Response(HTTP_201=Usuario)
 )
 def cadastrar_usuario():
-    novo_usuario = UsuarioORM(
-        nome=request.json.get("nome"),
-        criado_em=datetime.now()
-    )
-    with Session(bind=engine, expire_on_commit=False) as session:
-        session.begin()
-        try:
-            session.add(novo_usuario)
-        except Exception as erro:
-            session.rollback()
-            return jsonify(
-                {
-                    "erro": f"Aconteceu um erro ao cadastrar o usuário {novo_usuario.nome}",
-                    "log": str(erro)
-                }
-            )
-        else:
-            session.commit()
-            session.close()
-            return jsonify(
-                Usuario(
-                    id=novo_usuario.id,
-                    nome=novo_usuario.nome,
-                    criado_em=novo_usuario.criado_em
-                ).dict()
-            )
+    try:
+        novo_usuario = UsuarioORM(
+            nome=request.json.get("nome"),
+            criado_em=datetime.now()
+        )
+        UsuarioRepoEscrita().adicionar(usuario=novo_usuario)
+    except Exception as erro:
+        return jsonify(
+            {
+                "erro": f"Aconteceu um erro ao cadastrar o usuário {novo_usuario.nome}",
+                "log": str(erro)
+            }
+        )
+    else:
+        return jsonify(
+            Usuario(
+                id=novo_usuario.id,
+                nome=novo_usuario.nome,
+                criado_em=novo_usuario.criado_em
+            ).dict()
+        )
 
 
 @usuario.put('/<int:id_usuario>')
