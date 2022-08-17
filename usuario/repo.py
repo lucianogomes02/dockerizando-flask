@@ -75,6 +75,7 @@ class UsuarioRepoEscrita(RepoEscrita):
             self.__db.delete(usuario)
         except Exception as erro:
             self.__db.rollback()
+            return erro
         else:
             self.__db.commit()
         finally:
