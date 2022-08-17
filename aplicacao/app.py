@@ -1,5 +1,5 @@
 from flask import Flask
-from usuario.pontos_de_entrada.usuario import usuario, spec
+from usuario.apis import usuario, spec
 
 app = Flask(__name__)
 

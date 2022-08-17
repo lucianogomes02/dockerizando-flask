@@ -1,4 +1,4 @@
-from usuario_orm import Base
+from usuario.orm import Base
 from sqlalchemy import create_engine
 
 from pydantic import BaseModel

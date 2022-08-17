@@ -1,8 +1,8 @@
-from rotas import Usuario, Usuarios, engine
+from .modelos import Usuario, Usuarios, engine
 
 from flask import request, jsonify, Blueprint
 from flask_pydantic_spec import FlaskPydanticSpec
-from usuario_orm import UsuarioORM
+from .orm import UsuarioORM
 from sqlalchemy.orm import Session
 
 from flask_pydantic_spec import Request, Response
