@@ -33,11 +33,11 @@ def pegar_usuarios():
     resp=Response(HTTP_201=Usuario)
 )
 def cadastrar_usuario():
+    novo_usuario = UsuarioORM(
+        nome=request.json.get("nome"),
+        criado_em=datetime.now()
+    )
     try:
-        novo_usuario = UsuarioORM(
-            nome=request.json.get("nome"),
-            criado_em=datetime.now()
-        )
         UsuarioRepoEscrita().adicionar(usuario=novo_usuario)
     except Exception as erro:
         return jsonify(
@@ -62,28 +62,24 @@ def cadastrar_usuario():
     resp=Response(HTTP_201=Usuario, HTTP_500=None)
 )
 def alterar_usuario(id_usuario):
-    with Session(bind=engine, autoflush=False) as session:
-        try:
-            body = request.json
-            usuario = session.query(UsuarioORM).filter_by(id=id_usuario)
-            if usuario:
-                usuario.update({"nome": body.get("nome")})
-        except Exception as erro:
-            session.rollback()
-            return jsonify(
-                {
-                    "erro": f"Aconteceu um erro ao alterar o usuário {body.get('nome')}",
-                    "log": str(erro)
-                }
-            )
-        else:
-            session.commit()
-            session.close()
-            return jsonify(
-                Usuario(
-                    nome=body.get("nome"),
-                ).dict()
-            )
+    try:
+        UsuarioRepoEscrita().atualizar(
+            id_usuario=id_usuario,
+            args=request.json
+        )
+    except Exception as erro:
+        return jsonify(
+            {
+                "erro": f"Aconteceu um erro ao alterar o usuário {request.json.get('nome')}",
+                "log": str(erro)
+            }
+        )
+    else:
+        return jsonify(
+            Usuario(
+                nome=request.json.get("nome"),
+            ).dict()
+        )
 
 
 @usuario.delete('/<int:id_usuario>')
