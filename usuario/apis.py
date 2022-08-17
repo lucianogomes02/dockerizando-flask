@@ -85,18 +85,14 @@ def alterar_usuario(id_usuario):
 @usuario.delete('/<int:id_usuario>')
 @spec.validate(resp=Response('HTTP_204'))
 def deletar_usuario(id_usuario):
-    with Session(bind=engine, autoflush=False) as session:
-        try:
-            usuario = session.query(UsuarioORM).filter_by(id=id_usuario).one()
-            session.delete(usuario)
-        except Exception as erro:
-            session.rollback()
-            return jsonify(
-                {
-                    "erro": f"Aconteceu um erro ao deletar o usuário",
-                    "log": str(erro)
-                }
-            )
-        else:
-            session.commit()
-    return jsonify({})
+    try:
+        UsuarioRepoEscrita().deletar(id_usuario=id_usuario)
+    except Exception as erro:
+        return jsonify(
+            {
+                "erro": f"Aconteceu um erro ao deletar o usuário",
+                "log": str(erro)
+            }
+        )
+    else:
+        return jsonify({})
