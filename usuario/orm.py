@@ -4,9 +4,7 @@ from sqlalchemy import (
     String,
     DateTime,
 )
-from sqlalchemy.orm import declarative_base
-
-Base = declarative_base()
+from aplicacao.db import Base
 
 
 class UsuarioORM(Base):
