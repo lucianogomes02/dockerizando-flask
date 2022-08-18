@@ -11,6 +11,7 @@ psycopg2 = "^2.9.3"
 SQLAlchemy = "^1.4.39"
 flask-pydantic-spec = "^0.3.1"
 Werkzeug = "2.1.2"
+python-dotenv = "^0.20.0"
 
 [tool.poetry.dev-dependencies]
 

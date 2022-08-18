@@ -7,24 +7,28 @@ services:
       context: ./
       dockerfile: Dockerfile
     container_name: flask-api
-    image: flask-app:latest
+    image: flask-api:latest
     restart: unless-stopped
     environment:
-      APP_ENV: "prod"
-      APP_DEBUG: "False"
-      APP_PORT: 5000
+      APP_ENV: ${APP_ENV}
+      APP_DEBUG: ${APP_DEBUG}
+      APP_PORT: ${APP_PORT}
+      SQLALCHEMY_DATABASE_URI: ${SQLALCHEMY_DATABASE_URI}
     ports:
-      - 8080:5000
+      - "5000:5000"
+    networks:
+      - default
 
   postgresql:
     environment:
-      POSTGRES_USER: test
-      POSTGRES_PASSWORD: test
-      POSTGRES_DB: test
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    container_name: postgresql
     restart: always
     image: postgres:12.6
     ports:
-      - 5432:5432
+      - "5432:5432"
     networks:
       - default
     volumes:

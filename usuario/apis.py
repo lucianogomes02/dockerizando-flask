@@ -1,10 +1,8 @@
 from .modelos import Usuario, Usuarios
-from aplicacao.db import engine
 
 from flask import request, jsonify, Blueprint
 from flask_pydantic_spec import FlaskPydanticSpec
 from .orm import UsuarioORM
-from sqlalchemy.orm import Session
 
 from flask_pydantic_spec import Request, Response
 

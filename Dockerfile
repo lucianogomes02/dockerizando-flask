@@ -13,6 +13,7 @@ COPY . .
 RUN poetry config virtualenvs.create false \
   && poetry install --no-interaction --no-ansi
 
-RUN export FLASK_APP=app.py
+RUN export FLASK_APP=aplicacao/app.py
+EXPOSE 5000
 
 CMD [ "flask", "run", "--host=0.0.0.0"]
