@@ -1,5 +1,6 @@
 /__pycache__
 aplicacao/__pycache__
 usuario/__pycache__
+postgres-data
 .vscode
 .idea
